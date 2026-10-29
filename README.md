@@ -1,6 +1,6 @@
 # PDF answers with citations
 
-> "Our support team keeps answering the same questions, and we want an AI chatbot that answers accurately from our own documents, not generic ChatGPT answers."
+> "Our support team keeps answering the same questions, and we want an AI chatbot that answers accurately from our own documents, not generic AI answers."
 
 Open-source demo: a small Python service that answers questions from a folder of PDFs, shows the **document name and page** for every answer, and says **"I couldn't find this in the documents."** instead of guessing. The sample PDFs are about a fictional company, Acme Supply Co.
 
@@ -10,7 +10,7 @@ Open-source demo: a small Python service that answers questions from a folder of
 - `/chat` API (FastAPI) and a small web page: the answer, clickable citations that open the PDF **at the cited page**, and the retrieved snippets with the quoted sentence highlighted.
 - **Refuses** when retrieval confidence is low or the answer cannot be tied to a retrieved passage. No model is called for a refused question.
 - **Validates every citation** against the index before it is shown: the chunk exists, file and page match, and the quoted text is really in that chunk.
-- Runs **fully offline by default** (extractive mode, no LLM, no API key). OpenAI, Anthropic Claude, Google Gemini or a local Ollama model can be switched on with two environment variables.
+- Runs **fully offline by default** (extractive mode, no LLM, no API key). OpenAI, Anthropic Claude, Google Gemini or a local Ollama model can be switched on with environment variables (provider, model and API key).
 - One command runs an **evaluation** on sample questions (including questions the documents cannot answer) and prints a markdown table.
 
 | Answer with citations | Out-of-scope question |
@@ -146,6 +146,7 @@ Per-question results, including the misses, are in [docs/eval-results.md](docs/e
 - **Scanned PDFs** (images without a text layer) are not supported; they are logged and skipped. OCR is not included.
 - **Tables and multi-column layouts** are extracted as plain text, which can mix up columns.
 - English only (stemming and the stopword list are English).
+- A question that mixes a covered topic with something the documents never mention can still pass the threshold and get the general answer. For example, "How much does expedited shipping to Canada cost?" returns the expedited shipping price, while the documents say they ship to the United States only. An LLM reading the snippets is more likely to notice this, but that was not measured.
 - Tested on the five small fictional PDFs in `sample_docs/`, not on a real 80-document corpus.
 - No authentication, rate limiting or chat history. Each question is answered on its own.
 - The index is in memory; adding or changing PDFs needs a restart.

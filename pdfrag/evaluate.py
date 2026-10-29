@@ -146,13 +146,13 @@ def main() -> None:
 
     if args.write or args.update_readme:
         RESULTS.parent.mkdir(exist_ok=True)
-        RESULTS.write_text(report, encoding="utf-8")
+        RESULTS.write_text(report, encoding="utf-8", newline="\n")
     if args.update_readme and README.exists():
         text = README.read_text(encoding="utf-8")
         block = f"{START}\n{summary}\n{END}"
         text, n = re.subn(re.escape(START) + r".*?" + re.escape(END), lambda _: block, text, flags=re.S)
         if n:
-            README.write_text(text, encoding="utf-8")
+            README.write_text(text, encoding="utf-8", newline="\n")
 
 
 if __name__ == "__main__":

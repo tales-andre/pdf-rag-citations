@@ -14,7 +14,9 @@ Flow for every question:
 from __future__ import annotations
 
 import logging
+import math
 import re
+from collections import Counter
 from urllib.parse import quote as urlquote
 
 from langchain_core.documents import Document
@@ -24,9 +26,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel
 
 from .config import Settings
-import math
-from collections import Counter
-
 from .retriever import BM25PageRetriever, LexicalIndex, weighted_coverage
 from .text import normalize_ws, numbers_in, query_groups, split_sentences, tokenize
 
