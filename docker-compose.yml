@@ -1,0 +1,16 @@
+services:
+  app:
+    build:
+      context: .
+      args:
+        WITH_LLM: ${WITH_LLM:-0}
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      DOCS_DIR: /docs
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      # Point this at your own folder of PDFs. Mounted read-only.
+      - ${PDF_FOLDER:-./sample_docs}:/docs:ro

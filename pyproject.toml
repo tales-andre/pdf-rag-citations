@@ -1,0 +1,11 @@
+[project]
+name = "pdf-rag-citations"
+version = "1.0.0"
+description = "Answer questions from a folder of PDFs with page-level citations, and refuse when the answer is not there."
+requires-python = ">=3.11"
+license = "MIT"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q"

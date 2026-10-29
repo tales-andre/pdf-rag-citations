@@ -1,0 +1,119 @@
+# Sample evaluation set for the fictional Acme Supply Co. documents.
+#
+# answerable questions list the pages that contain the answer (`expected`,
+# any one of them counts) and a short fact the answer must contain
+# (`must_contain`, case-insensitive). `reference` is a ground-truth answer you
+# can reuse with RAGAS or another LLM-judged evaluation.
+#
+# unanswerable questions are about things the documents do not say. The
+# correct behavior is to refuse.
+#
+# Wording is deliberately not copied from the documents where possible.
+
+questions:
+  - id: q01
+    question: How many days do customers have to return an unopened item?
+    expected: [{source: acme-returns-and-refunds-sop.pdf, page: 1}]
+    must_contain: "30 days"
+    reference: Unopened items can be returned within 30 days of delivery for a full refund.
+
+  - id: q02
+    question: Is there a restocking fee when the item was opened?
+    expected: [{source: acme-returns-and-refunds-sop.pdf, page: 1}]
+    must_contain: "15%"
+    reference: Opened items have a 15% restocking fee and must be returned within 14 days.
+
+  - id: q03
+    question: After the warehouse inspects a return, when is the refund issued?
+    expected: [{source: acme-returns-and-refunds-sop.pdf, page: 2}]
+    must_contain: "5 business days"
+    reference: Refunds go to the original payment method within 5 business days after inspection.
+
+  - id: q04
+    question: What does error E01 mean on the standing desk?
+    expected: [{source: acme-ergodesk-pro-product-guide.pdf, page: 3}]
+    must_contain: "motor overload"
+    reference: E01 means motor overload; remove weight and hold the down button for 10 seconds.
+
+  - id: q05
+    question: How do I save a height as a memory preset?
+    expected: [{source: acme-ergodesk-pro-product-guide.pdf, page: 2}]
+    must_contain: "three seconds"
+    reference: Move to the height, press M, then hold a preset button 1-4 for three seconds.
+
+  - id: q06
+    question: What is the maximum weight the ErgoDesk Pro can carry?
+    expected: [{source: acme-ergodesk-pro-product-guide.pdf, page: 1}]
+    must_contain: "120 kg"
+    reference: The maximum load capacity is 120 kg, evenly distributed.
+
+  - id: q07
+    question: What order total qualifies for free standard shipping?
+    expected: [{source: acme-shipping-faq.pdf, page: 1}]
+    must_contain: "$75"
+    reference: Standard shipping is free for orders over $75.
+
+  - id: q08
+    question: How much does white-glove delivery cost?
+    expected: [{source: acme-shipping-faq.pdf, page: 2}]
+    must_contain: "$149"
+    reference: White-glove delivery costs $149 and includes assembly and packaging removal.
+
+  - id: q09
+    question: How long is the warranty on the desk motors?
+    expected: [{source: acme-warranty-policy.pdf, page: 1}]
+    must_contain: "5 years"
+    reference: Motors and electronics are covered for 5 years.
+
+  - id: q10
+    question: Where is the serial number located?
+    expected: [{source: acme-warranty-policy.pdf, page: 2}]
+    must_contain: "under the desktop"
+    reference: On a label under the desktop, next to the control box.
+
+  - id: q11
+    question: A customer says the desk has a burning smell. What should the agent do?
+    expected: [{source: acme-support-escalation-sop.pdf, page: 2}]
+    must_contain: "unplug"
+    reference: Tell the customer to unplug the desk and stop using it, then escalate to Tier 2 as urgent.
+
+  - id: q12
+    question: Who has to approve refunds over $500?
+    expected:
+      - {source: acme-returns-and-refunds-sop.pdf, page: 3}
+      - {source: acme-support-escalation-sop.pdf, page: 2}
+    must_contain: "manager"
+    reference: A support manager must approve refunds over $500.
+
+  - id: q13
+    question: Can furniture be shipped to a PO box?
+    expected: [{source: acme-shipping-faq.pdf, page: 1}]
+    must_contain: "PO boxes"
+    reference: No. Furniture is not shipped to PO boxes.
+
+  - id: q14
+    question: What tools do I need to assemble the desk?
+    expected: [{source: acme-ergodesk-pro-product-guide.pdf, page: 2}]
+    must_contain: "Phillips screwdriver"
+    reference: Only a Phillips screwdriver; other tools are in the box.
+
+  # ---- not in the documents: the bot must refuse
+  - id: u01
+    question: Can I pay with cryptocurrency?
+    unanswerable: true
+
+  - id: u02
+    question: What is the warranty on the X500 drone?
+    unanswerable: true
+
+  - id: u03
+    question: Who is the CEO of Acme Supply Co.?
+    unanswerable: true
+
+  - id: u04
+    question: What is the phone number for customer support?
+    unanswerable: true
+
+  - id: u05
+    question: Do you have a retail store in Chicago?
+    unanswerable: true

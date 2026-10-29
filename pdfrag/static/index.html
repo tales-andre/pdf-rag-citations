@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docs Assistant</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --ink: #1d2433; --muted: #5d6677; --line: #e2e5ea;
+    --accent: #1f5fbf; --accent-soft: #e8f0fc; --ok: #1b7f4b; --ok-soft: #e6f4ec;
+    --warn: #9a5b00; --warn-soft: #fdf3e2; --mark: #fff1a8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { background: var(--card); border-bottom: 1px solid var(--line); }
+  .bar { max-width: 1240px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .bar h1 { font-size: 18px; margin: 0; }
+  .bar .org { color: var(--muted); font-size: 14px; }
+  .badge { margin-left: auto; font-size: 13px; padding: 4px 10px; border-radius: 999px;
+           background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  main { max-width: 1240px; margin: 0 auto; padding: 22px 24px 40px; display: grid;
+         grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 22px; }
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
+  form { display: flex; gap: 10px; }
+  input[type=text] { flex: 1; font: inherit; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; }
+  input[type=text]:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+  button { font: inherit; font-weight: 600; padding: 10px 18px; border-radius: 8px; border: 0;
+           background: var(--accent); color: #fff; cursor: pointer; }
+  button:disabled { opacity: .6; cursor: wait; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .chip { font-size: 13px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 999px;
+          background: #fafbfc; color: var(--muted); cursor: pointer; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; }
+  .question { font-weight: 600; margin-bottom: 8px; }
+  .answer { font-size: 16px; }
+  .answer sup a { text-decoration: none; font-weight: 700; color: var(--accent); padding: 0 1px; }
+  .status { display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 6px; margin-bottom: 10px; }
+  .status.ok { background: var(--ok-soft); color: var(--ok); }
+  .status.refused { background: var(--warn-soft); color: var(--warn); }
+  .refusal { border-left: 4px solid var(--warn); padding-left: 12px; }
+  .reason { color: var(--muted); font-size: 14px; margin-top: 6px; }
+  .cites { margin: 14px 0 0; padding: 0; list-style: none; border-top: 1px solid var(--line); }
+  .cites li { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; display: flex; gap: 8px; }
+  .cites .n { font-weight: 700; color: var(--accent); min-width: 22px; }
+  .cites a { color: var(--ink); font-weight: 600; }
+  .meta { color: var(--muted); font-size: 13px; margin-top: 12px; }
+  .snip { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; font-size: 14px; }
+  .snip.cited { border-color: var(--ok); box-shadow: inset 3px 0 0 var(--ok); }
+  .snip.flash { animation: flash 1.2s ease-out; }
+  @keyframes flash { from { background: var(--accent-soft); } to { background: transparent; } }
+  .snip header { background: none; border: 0; display: flex; justify-content: space-between; gap: 8px;
+                 font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .snip header a { color: var(--ink); font-weight: 600; }
+  .snip .tag { font-weight: 700; color: var(--ok); }
+  .snip p { margin: 0; white-space: pre-line; }
+  mark { background: var(--mark); padding: 0 1px; }
+  .empty { color: var(--muted); font-size: 14px; }
+  .note { color: var(--muted); font-size: 12.5px; margin-top: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <h1>Docs Assistant</h1>
+    <span class="org">Acme Supply Co. (fictional) · answers only from your PDFs</span>
+    <span class="badge" id="mode">loading…</span>
+  </div>
+</header>
+<main>
+  <section>
+    <div class="card">
+      <form id="ask">
+        <input type="text" id="q" placeholder="Ask a question about the documents…" autocomplete="off" maxlength="1000" aria-label="Question">
+        <button id="go" type="submit">Ask</button>
+      </form>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="card" style="margin-top:18px" id="result">
+      <h2>Answer</h2>
+      <p class="empty">Ask a question. Every answer links to the document and page it came from; if the documents do not cover it, the assistant says so.</p>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Retrieved snippets</h2>
+    <div id="snippets"><p class="empty">The passages found for your question appear here, with the cited ones highlighted.</p></div>
+    <p class="note" id="docs"></p>
+  </section>
+</main>
+<script>
+const EXAMPLES = [
+  "How many days do customers have to return an unopened item?",
+  "What does error E01 mean on the standing desk?",
+  "How much does white-glove delivery cost?",
+  "What is the warranty on the X500 drone?",
+];
+const $ = (id) => document.getElementById(id);
+const esc = (s) => s.replace(/[&<>"']/g, (c) => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+
+function highlight(text, quotes) {
+  let html = esc(text.replace(/\n\s*\n/g, "\n"));
+  for (const q of quotes) {
+    const eq = esc(q);
+    if (eq && html.includes(eq)) html = html.replace(eq, `<mark>${eq}</mark>`);
+  }
+  return html;
+}
+
+function renderAnswer(r) {
+  const box = $("result");
+  if (r.refused) {
+    box.innerHTML = `<h2>Answer</h2><span class="status refused">Not found in documents</span>
+      <div class="question">${esc(r.question)}</div>
+      <div class="refusal"><div class="answer">${esc(r.answer)}</div>
+      <div class="reason">${esc(r.reason_text || "")}</div></div>
+      <div class="meta">Confidence ${r.confidence.toFixed(2)} · ${esc(r.mode)} · nothing was guessed</div>`;
+    return;
+  }
+  const byN = Object.fromEntries(r.citations.map((c) => [c.n, c]));
+  const answer = esc(r.answer).replace(/\[(\d+)\]/g, (m, n) => {
+    const c = byN[n];
+    return c ? `<sup><a href="${esc(c.url)}" target="_blank" rel="noopener" title="${esc(c.source)}, page ${c.page}" data-chunk="${esc(c.chunk_id)}">[${n}]</a></sup>` : m;
+  });
+  const cites = r.citations.map((c) => `<li><span class="n">[${c.n}]</span><span>
+      <a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.source)}</a> — page ${c.page}</span></li>`).join("");
+  box.innerHTML = `<h2>Answer</h2><span class="status ok">Answered from documents</span>
+    <div class="question">${esc(r.question)}</div>
+    <div class="answer">${answer}</div>
+    <ul class="cites">${cites}</ul>
+    <div class="meta">Confidence ${r.confidence.toFixed(2)} · ${esc(r.mode)}</div>`;
+  box.querySelectorAll("sup a").forEach((a) => a.addEventListener("mouseenter", () => {
+    const el = document.querySelector(`.snip[data-chunk="${CSS.escape(a.dataset.chunk)}"]`);
+    if (el) { el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+  }));
+}
+
+function renderSnippets(r) {
+  if (!r.snippets.length) { $("snippets").innerHTML = `<p class="empty">No passage matched the question.</p>`; return; }
+  const quotes = {};
+  r.citations.forEach((c) => (quotes[c.chunk_id] ||= []).push(c.quote));
+  $("snippets").innerHTML = r.snippets.map((s) => `
+    <div class="snip ${s.cited ? "cited" : ""}" data-chunk="${esc(s.chunk_id)}">
+      <header><a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.source)} · page ${s.page}</a>
+        <span>${s.cited ? '<span class="tag">cited · </span>' : ""}match ${s.coverage.toFixed(2)}</span></header>
+      <p>${highlight(s.text, quotes[s.chunk_id] || [])}</p>
+    </div>`).join("");
+}
+
+async function ask(question) {
+  question = question.trim();
+  if (!question) return;
+  $("q").value = question;
+  $("go").disabled = true;
+  try {
+    const res = await fetch("/chat", {method: "POST", headers: {"Content-Type": "application/json"},
+                                      body: JSON.stringify({question})});
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const r = await res.json();
+    renderAnswer(r);
+    renderSnippets(r);
+    const url = new URL(location.href); url.searchParams.set("q", question); history.replaceState(null, "", url);
+  } catch (e) {
+    $("result").innerHTML = `<h2>Answer</h2><p class="reason">Request failed (${esc(String(e.message))}). Nothing was guessed.</p>`;
+  } finally {
+    $("go").disabled = false;
+  }
+}
+
+$("ask").addEventListener("submit", (e) => { e.preventDefault(); ask($("q").value); });
+EXAMPLES.forEach((q) => {
+  const b = document.createElement("span");
+  b.className = "chip"; b.textContent = q; b.onclick = () => ask(q);
+  $("chips").appendChild(b);
+});
+fetch("/health").then((r) => r.json()).then((h) => {
+  $("mode").textContent = h.mode.charAt(0).toUpperCase() + h.mode.slice(1);
+  $("docs").textContent = `${h.documents} PDF files indexed (${h.chunks} chunks). Documents stay on this server.`;
+});
+const initial = new URLSearchParams(location.search).get("q");
+if (initial) ask(initial);
+</script>
+</body>
+</html>
