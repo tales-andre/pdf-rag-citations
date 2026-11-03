@@ -1,6 +1,6 @@
 # PDF answers with citations
 
-> "Our support team keeps answering the same questions, and we want an AI chatbot that answers accurately from our own documents, not generic AI answers."
+**A common request on freelance job boards:** a support team keeps answering the same questions and wants an AI chatbot that answers accurately from its own documents, not generic AI answers.
 
 Open-source demo: a small Python service that answers questions from a folder of PDFs, shows the **document name and page** for every answer, and says **"I couldn't find this in the documents."** instead of guessing. The sample PDFs are about a fictional company, Acme Supply Co.
 
