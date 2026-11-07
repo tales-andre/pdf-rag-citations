@@ -1,5 +1,7 @@
 # PDF answers with citations
 
+[![CI](https://github.com/tales-andre/pdf-rag-citations/actions/workflows/ci.yml/badge.svg)](https://github.com/tales-andre/pdf-rag-citations/actions/workflows/ci.yml)
+
 **A common request on freelance job boards:** a support team keeps answering the same questions and wants an AI chatbot that answers accurately from its own documents, not generic AI answers.
 
 Open-source demo: a small Python service that answers questions from a folder of PDFs, shows the **document name and page** for every answer, and says **"I couldn't find this in the documents."** instead of guessing. The sample PDFs are about a fictional company, Acme Supply Co.
@@ -87,6 +89,8 @@ The response has `answer`, `refused`, `reason`, `confidence`, `citations` (`sour
 
 The LLM-mode tests use LangChain's fake chat model, so they run offline and check what happens when a model cites a passage that was not retrieved, invents a number, adds an uncited sentence, or fails.
 
+GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs the same tests and the evaluation on Python 3.11 with no API key and no LLM provider, and fails if the evaluation table below or `docs/eval-results.md` no longer matches a fresh run.
+
 ## Evaluation on the sample questions
 
 `eval/questions.yaml` has answerable questions (with the expected file and page, and a key fact the answer must contain) and questions the documents do not answer (the bot must refuse). Results in extractive mode, reproduced by `python -m pdfrag.evaluate --update-readme`:
@@ -147,7 +151,7 @@ Per-question results, including the misses, are in [docs/eval-results.md](docs/e
 - **Tables and multi-column layouts** are extracted as plain text, which can mix up columns.
 - English only (stemming and the stopword list are English).
 - A question that mixes a covered topic with something the documents never mention can still pass the threshold and get the general answer. For example, "How much does expedited shipping to Canada cost?" returns the expedited shipping price, while the documents say they ship to the United States only. An LLM reading the snippets is more likely to notice this, but that was not measured.
-- Tested on the five small fictional PDFs in `sample_docs/`, not on a real 80-document corpus.
+- Tested only on the five small fictional PDFs in `sample_docs/`, not on a real customer corpus.
 - No authentication, rate limiting or chat history. Each question is answered on its own.
 - The index is in memory; adding or changing PDFs needs a restart.
 
@@ -155,7 +159,7 @@ Per-question results, including the misses, are in [docs/eval-results.md](docs/e
 
 - **Your documents:** point `DOCS_DIR` (or `PDF_FOLDER` with Docker) at the folder. Nothing else changes.
 - **Your evaluation:** replace `eval/questions.yaml` with your 15–20 questions (expected file and page, a key fact, and a few questions the documents should not answer), then run `python -m pdfrag.evaluate --sweep` to pick `MIN_CONFIDENCE` for your documents.
-- **OpenAI** (the stack in the brief): `LLM_PROVIDER=openai`, `LLM_MODEL=<your model>`, `OPENAI_API_KEY=...`. The same grounding checks apply.
+- **OpenAI:** `LLM_PROVIDER=openai`, `LLM_MODEL=<your model>`, `OPENAI_API_KEY=...`. The same grounding checks apply.
 - **Better recall:** add an embedding retriever (for example OpenAI embeddings or a local model) next to `BM25PageRetriever`, merge the two result lists (hybrid search), and keep `answer.py` as it is.
 - **Where people ask:** the `/chat` endpoint can sit behind a help-desk widget, Slack or Teams bot; the response already carries the citations to show.
 - **Other file types:** add a loader in `pdfrag/ingest.py` that returns one Document per page or section with `source` and `page` metadata.
